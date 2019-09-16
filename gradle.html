@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="css/index.css" />
+	</head>
+	<body class="padding_top">
+		<h3>gradle打包流程</h1>
+			
+			<div>
+				1) aapt。 为 res 目录下的资源生成 R.java 文件，Manifest.java 文件 。
+			</div>
+			
+			<div>2) aidl 。 把项目中自定义的 aid！文件生成相应的 Java 代码文件 。
+			</div>
+			
+			<div>
+3) javac 。 把项目中所有的 Java 代码编译成 class 文件 。 包括三部分 Java 代码，自己写
+			</div>
+			
+			<div>
+的业务逻辑代码， aapt 生成的 Java 文件， aidl 生成的 Java 文件 。
+			</div>
+			
+			
+			<div>
+4) proguard。 1昆淆同时生成 proguardMapping. txt 。 这一步是可选的 。
+			</div>
+			
+			
+			<div>
+5) dex 。 把所有的 class 文件（包括第三方库的 class 文件）转换为 dex 文件 。
+			</div>
+			
+			
+			<div>
+6) aapt。 还是使用 aapt，这里使用它的另 一个功能，即打包，把 res 目录下的资源、assets 目录下的文件，打包成一个 .ap一文件 。
+			</div>
+			
+			
+			<div>
+7 ) apkbuilder。 将所有的 dex 文件 、 ap 文件、 AndroidManifest且nl 打包为 .apk 文件，这是一个未签名的 apk 包 。
+			</div>
+			
+			
+			<div>
+8 ) jarsigner。 对 apk 进行签名
+			</div>
+			
+			<div>
+9) zipalign 。 对要发布的 apk 文件进行对齐操作，以便在运行时节省内存 。
+			</div>
+			
+	</body>
+</html>
