@@ -1,4 +1,30 @@
-之前已经来了好几篇和RSA加密相关的文章了，这次还是趁热打铁，看一下RSA在APK签名中的应用，最后我们分析一下为什么这种方式能够具有安全性。RSA对apk签名的体现就在apk文件中的META-INF文件夹中，我们先来拿一个例子分析一下。
+# Android打包签名原理
+
+
+
+### 1、打包资源文件，生成R.java文件
+
+aapt来打包res资源文件，生成R.java、resources.arsc和res文件
+
+![image-20191218161438441](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191218161438441.png)
+
+### 2、处理aidl文件，生成相应的Java文件
+
+aidl（Android Interface Definition Language，Android接口描述语言），位于android-sdk/platform-tools目录下。aidl工具解析接口定义文件然后生成相应的Java代码接口供程序调用。如果项目没用到aidl则跳过这一步。
+
+#### 3.编译项目源代码，生成class文件
+
+Java Compiler阶段。项目中所有的Java代码，包括R.java和.aidl文件，都会变Java编译器（javac）编译成.class文件，生成的class文件位于工程中的bin/classes目录下。
+
+#### 4.转换所有的class文件，生成classes.dex文件
+
+dex阶段。通过dx工具，将.class文件和第三方库中的.class文件处理生成classes.dex文件。该工具位于android-sdk/platform-tools 目录下。dx工具的主要工作是将Java字节码转成成Dalvik字节码、压缩常量池、消除冗余信息等。
+
+#### 5.打包生成APK文件
+
+apkbuilder阶段。通过apkbuilder工具，将aapt生成的resources.arsc和res文件、assets文件和classes.dex一起打包生成apk。打包的工具apkbuilder位于 android-sdk/tools目录下。
+
+**打包详细如下**
 
 以最新的QQ6.6.2的apk为例，现在的解压工具默认就可以解压apk了，所以也不要先改成zip然后解压了，解压后apk里面的文件大概就是这样的：
 ![image-20191218155802793](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191218155802793.png)
@@ -150,5 +176,49 @@ String signatureFile = certFile.substring(0, certFile.lastIndexOf('.')) + ".SF";
 假如我们是一个非法者，想要篡改apk内容，我们怎么做呢？如果我们只把原文件改动了（比如加入了自己的病毒代码），那么重新打包后系统就会认为文件的SHA256-Base64值和MF的不一致导致安装失败，既然这样，那我们就改一下MF让他们一致呗？如果只是这样那么系统就会发现MF文件的内容的SHA256-Base64与SF不一致，还是会安装失败，既然这样，那我们就改一下SF和MF一致呗？如果这么做了，系统就会发现RSA解密后的值和SF的SHA256不一致，安装失败。那么我们让加密后的值和SF的SHA256一致就好了呗，但是呢，这个用来签名加密的是私钥，公钥随便玩，但是私钥我们却没有，所以没法做到一致。所以说上面的过程环环相扣，最后指向了RSA非对称加密的保证。有人说，那我可以直接重签名啊，这样所有的信息就一致了啊，是的，没错，重签名后就可以安装了，这就是说签名机制只是保证了apk的完整性，具体是不是自己的apk包，系统并不知道，那我们上面说的安全性是怎么保证的呢？那就是我们可以随便签名，随便安装，但是在覆盖安装的时候由于我们的签名和作者的签名不一致，导致我们重签名后的apk无法覆盖掉原作者的。这就保证了已经安装的apk的接下来的安全链的正确性。当然了，如果你的手机上来就直接安装了一个第三方的非法签名的apk，那么原作者的官方apk也不能再安装了，因为系统认为他是非法的。
 
 最后，上面说了，无法做到修改apk后重签名来覆盖原作者的apk，那么如果手机上本来就没有原作者的apk包呢，单独给我们一个apk我们能玩出什么花样呢？这些留在以后吧，预告一下之后的可能的内容：反编译是怎么搞呢？二次打包如何搞呢？怎么植入代码呢？等等等等。
+
+### 6.对APK文件进行签名
+
+Jarsigner阶段。通过Jarsigner工具，对上面的apk进行debug或release签名。
+
+**签名过程：**
+
+1. **计算摘要**
+
+   通过Hash算法提取出原始数据的摘要；
+
+2. **计算签名**
+
+   再通过基于密钥（**私钥**）的非对称加密算法对提取出的摘要进行加密，加密后的数据就是签名信息；
+
+3. **写入签名**
+
+   将签名信息写入原始数据的签名区块内。
+
+再来看**校验过程：**
+
+1. **计算摘要**
+
+   接收方接收到数据后，首先用同样的Hash算法从接收到的数据中提取出摘要；
+
+2. **解密签名**
+
+   使用发送方的**公钥**对数字签名进行解密，解密出原始摘要；
+
+3. **比较摘要**
+
+   如果解密后的数据和提取的摘要一致，则校验通过；如果数据被第三方篡改过，解密后的数据和摘要不一致，校验不通过。
+
+### 7. 对签名后的APK文件进行对齐处理
+
+通过zipalign工具，将签名后的apk进行对齐处理。工具位于android-sdk/tools目录下。对齐的主要过程是将APK包中所有的资源文件距离文件起始偏移为4字节整数倍，这样通过内存映射访问apk文件时的速度会更快。对齐的作用就是减少运行时内存的使用。
+
+![image-20191218161901092](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191218161901092.png)
+
+
+
+参考：https://www.jianshu.com/p/286d2b372334
+
+参考：https://blog.csdn.net/loongago/article/details/89646920
 
 参考：https://blog.csdn.net/lostinai/article/details/54694564
