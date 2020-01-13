@@ -966,7 +966,9 @@ public void onSizeReady(int width, int height) {
     if (IS_VERBOSE_LOGGABLE) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }
-  }public <R> LoadStatus load(
+  }
+
+public <R> LoadStatus load(
       GlideContext glideContext,
       Object model,
       Key signature,
@@ -990,7 +992,7 @@ public void onSizeReady(int width, int height) {
 //生成图片对应的key，判断缓存用
     EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
         resourceClass, transcodeClass, options);
-
+//从激活的资源文件中加载
     EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
     if (active != null) {
       cb.onResourceReady(active, DataSource.MEMORY_CACHE);
@@ -999,7 +1001,7 @@ public void onSizeReady(int width, int height) {
       }
       return null;
     }
-
+//从MemoryCache加载
     EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {
       cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
@@ -1008,7 +1010,7 @@ public void onSizeReady(int width, int height) {
       }
       return null;
     }
-
+//从Jobs map中加载
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
     if (current != null) {
       current.addCallback(cb);
