@@ -82,7 +82,7 @@ builder.connectTimeout(10, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS).c
 //                        ) 两种方式结果是一样的，写法不同
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + offlineCacheTime)
                                 .build();
-                    }
+                    } 17216
                     return chain.proceed(request);
             }
         }).addNetworkInterceptor(new Interceptor() {

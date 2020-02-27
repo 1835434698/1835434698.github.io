@@ -567,9 +567,9 @@ public void draw(Canvas c) {
 public final class Recycler {
     //4级缓存
     final ArrayList<ViewHolder> mAttachedScrap = new ArrayList<>();//存放全部的对象
-    ArrayList<ViewHolder> mChangedScrap = null;//发生改变的对象
-    final ArrayList<ViewHolder> mCachedViews = new ArrayList<ViewHolder>();//存放remove调的视图的VIewHolder对象(保存的信息、绑定的数据未删除)，容量有限制默认是2。
-    RecycledViewPool mRecyclerPool;//存放remove调的视图的VIewHolder对象（完全删除信息、数据等）。
+    ArrayList<ViewHolder> mChangedScrap = null;//发生改变的对象  1级
+    final ArrayList<ViewHolder> mCachedViews = new ArrayList<ViewHolder>();//存放remove调的视图的VIewHolder对象(保存的信息、绑定的数据未删除)，容量有限制默认是2。  2级
+    RecycledViewPool mRecyclerPool;//存放remove调的视图的VIewHolder对象（完全删除信息、数据等）。  3级
     
     private final List<ViewHolder>
             mUnmodifiableAttachedScrap = Collections.unmodifiableList(mAttachedScrap);//当前在报废列表中的不可修改的列表
@@ -579,7 +579,7 @@ public final class Recycler {
     int mViewCacheMax = DEFAULT_CACHE_SIZE;//最大View缓存个数，默认2.
 
 
-    private ViewCacheExtension mViewCacheExtension; //缓存扩展类，支持用户自定义
+    private ViewCacheExtension mViewCacheExtension; //缓存扩展类，支持用户自定义   4级
 
     static final int DEFAULT_CACHE_SIZE = 2;
 }
