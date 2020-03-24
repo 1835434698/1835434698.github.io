@@ -11,7 +11,7 @@ Java堆(Java Heap)是JVM所管理的最大内存区域，也是所有线程共�
  这样划分的目的是为了使 JVM 能够更好的管理堆内存中的对象，包括内存的分配以及回收。
 
 1. #### 标记清除算法
- 
+
  标记清除算法是最基础的回收算法，分为标记和清除两个部分：首先标记出所有需要回收的对象，这一过程在可达性分析过程中进行。在标记完之后统一回收所有被标记的对象。
 
  标记清除算法有如下不足：
@@ -22,7 +22,7 @@ Java堆(Java Heap)是JVM所管理的最大内存区域，也是所有线程共�
 空间问题
  清除之后会产生大量不连续的内存碎片，内存碎片太多会导致以后的程序运行中无法分配出较大的内存，从内不得不触发另外的垃圾回收。
 
-![image-20191217173503433](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191217173503433.png)
+![image-20191217173503433](data\typora-user-images\image-20191217173503433.png)
 
  如上图中，经过标记清除之后，假设有了100M空间，但是这100M是不连续的，最大的一块连续空间可能才10M，所以导致之后程序需要一块20M内存空间时就不得不再进行一次GC来继续清理空间，效率极低。
 
@@ -38,7 +38,7 @@ Java堆(Java Heap)是JVM所管理的最大内存区域，也是所有线程共�
 
  这样做的好处是每次都是对整个新生代一半的内存区域进行内存回收，内存分配时也就不需要考虑内存碎片等复杂情况，只需要移动堆顶指针，按顺序分配即可。此算法实现简单，运行高效。算法的执行流程如下图 :
 
-![image-20191217173615644](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191217173615644.png)
+![image-20191217173615644](data\typora-user-images\image-20191217173615644.png)
 
  现在主流的虚拟机，包括HotSpot都是采用的这种回收策略进行新生代内存的回收。
 
@@ -60,17 +60,17 @@ HotSpot实现的复制算法流程如下:
 
  3. 部分对象会在From和To区域中复制来复制去,如此交换15次(由JVM参数MaxTenuringThreshold决定,这个参数默认是15),最终如果还是存活,就存入到老年代。
 
-![image-20191217173628614](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191217173628614.png)
+![image-20191217173628614](data\typora-user-images\image-20191217173628614.png)
 
  发生在新生代的垃圾回收成为Minor GC，Minor GC又称为新生代GC，因为新生代对象大多都具备朝生夕灭的特性，因此Minor GC(采用复制算法)非常频繁，一般回收速度也比较快。
 
 3. ##### 标记整理算法(老年代回收算法)
- 
+
  复制算法在对象存活率较高的老年代会进行很多次的复制操作，效率很低，所以在栈的老年代不适用复制算法。
 
  针对老年代对象存活率高的特点，提出了一种称之为”标记-整理算法”。标记过程仍与”标记-清除”过程一致，但后续步骤不是直接对可回收对象进行清理，而是让所有存活对象都向一端移动，然后直接清理掉端边界以外的内存。流程图如下:
 
-![image-20191217173639363](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191217173639363.png)
+![image-20191217173639363](data\typora-user-images\image-20191217173639363.png)
 
  发生在老年代的GC称为Full GC，又称为Major GC，其经常会伴随至少一次的Minor GC(并非绝对，在Parallel Scavenge收集器中就有直接进行Full GC的策略选择过程)。Major GC的速度一般会比Minor GC慢10倍以上。
 

@@ -123,7 +123,7 @@ Binder的理解：
 
 Binder的工作机制：
 
-![img](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\dd8a7faf64e44c8ca2d498e167fc3bcd\4-1621501459.png)
+![img](data\qq432337FEDCB6EB5443353EB50AE37219\dd8a7faf64e44c8ca2d498e167fc3bcd\4-1621501459.png)
 
 当客户端发起远程请求时，由于当前线程会被挂起直至服务端进程返回数据，所以一个远程方法是很耗时的，那么不能在UI线程中发起此远程请求；
 

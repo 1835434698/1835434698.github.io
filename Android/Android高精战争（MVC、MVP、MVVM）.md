@@ -21,7 +21,7 @@
 
 ### 2.MVC设计架构
 
-![微信截图_20151201004323.png](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\f1198bb67e554baa85f9d70b67150817\10b0af1f7ad0.png)
+![微信截图_20151201004323.png](data\qq432337FEDCB6EB5443353EB50AE37219\f1198bb67e554baa85f9d70b67150817\10b0af1f7ad0.png)
 
 MVC简介
 
@@ -51,7 +51,7 @@ MVC代码实例
 
 先上界面图
 
-![20150606093217165.png](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\a5308a54c4ac411fa0dd55498e99339f\144f058551cb.png)
+![20150606093217165.png](data\qq432337FEDCB6EB5443353EB50AE37219\a5308a54c4ac411fa0dd55498e99339f\144f058551cb.png)
 
 **Controller控制器&View**
 
@@ -81,7 +81,7 @@ MVC的缺点
 
 MVP从更早的MVC框架演变过来，与MVC有一定的相似性：Controller/Presenter负责逻辑的处理，Model提供数据，View负责显示。
 
-![Clipboard Image.png](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\fadfc93b3bdf486bb98016f897477c9a\c4906a67e829.png)
+![Clipboard Image.png](data\qq432337FEDCB6EB5443353EB50AE37219\fadfc93b3bdf486bb98016f897477c9a\c4906a67e829.png)
 
 MVP框架由3部分组成：View负责显示，Presenter负责逻辑处理，Model提供数据。在MVP模式里通常包含3个要素（加上View interface是4个）：
 
@@ -106,7 +106,7 @@ MVP的Presenter是框架的控制者，承担了大量的逻辑操作，而MVC�
 - 通常View与Presenter是一对一的，但复杂的View可能绑定多个Presenter来处理逻辑。而Controller是基于行为的，并且可以被多个View共享，Controller可以负责决定显示哪个View
 - Presenter与View的交互是通过接口来进行的，更有利于添加单元测试。
 
-![MVC与MVP区别](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\d25238066be14017ba4b15fd6ab7008a\40113391482.jpeg)
+![MVC与MVP区别](data\qq432337FEDCB6EB5443353EB50AE37219\d25238066be14017ba4b15fd6ab7008a\40113391482.jpeg)
 
 因此我们可以发现**MVP的优点**如下：
 
@@ -128,7 +128,7 @@ UI层一般包括Activity，Fragment，Adapter等直接和UI相关的类，UI层
 
 MVP的变种有很多，其中使用最广泛的是Passive View模式，即被动视图。在这种模式下，View和Model之间不能直接交互，View通过Presenter与Model打交道。Presenter接受View的UI请求，完成简单的UI处理逻辑，并调用Model进行业务处理，并调用View将相应的结果反映出来。View直接依赖Presenter，但是Presenter间接依赖View，它直接依赖的是View实现的接口。
 
-![clip_image002[4]_thumb.jpg](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\9fc84d12afff428eb900e72d0d5c32a1\bff0a0081d8.jpeg)
+![clip_image002[4]_thumb.jpg](data\qq432337FEDCB6EB5443353EB50AE37219\9fc84d12afff428eb900e72d0d5c32a1\bff0a0081d8.jpeg)
 
 相对于View的被动，那Presenter就是主动的一方。对于Presenter的主动，有如下的理解：
 
@@ -156,7 +156,7 @@ MVP架构存在的问题与解决办法
 
 最终的架构如下图所示：
 
-![1422253914_8854.jpg](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\0061c6b42f944013b5d23bb51d9ebeaa\93b6a37d79b.jpeg)
+![1422253914_8854.jpg](data\qq432337FEDCB6EB5443353EB50AE37219\0061c6b42f944013b5d23bb51d9ebeaa\93b6a37d79b.jpeg)
 
 MVP代码实例
 
@@ -166,7 +166,7 @@ MVP代码实例
 
 先来看包结构图
 
-![20140928093820322.png](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\dbee201c0d664878838ab67d2b795d2b\38638a408d82.png)
+![20140928093820322.png](data\qq432337FEDCB6EB5443353EB50AE37219\dbee201c0d664878838ab67d2b795d2b\38638a408d82.png)
 
 **建立Bean**
 
@@ -215,7 +215,7 @@ MVVM可以算是MVP的升级版，其中的VM是ViewModel的缩写，ViewModel�
 
 在比较之前，先从图上看看三者的异同。
 
-![2f9e4ee7d9616257ab41de204c06ffd5_b.jpg](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\fb75c9262b1c4dcf97100ca8909f1711\393dfe1876a.jpeg)
+![2f9e4ee7d9616257ab41de204c06ffd5_b.jpg](data\qq432337FEDCB6EB5443353EB50AE37219\fb75c9262b1c4dcf97100ca8909f1711\393dfe1876a.jpeg)
 
 刚开始理解这些概念的时候认为这几种模式虽然都是要将view和model解耦，但是非此即彼，没有关系，一个应用只会用一种模式。后来慢慢发现世界绝对不是只有黑白两面，中间最大的一块其实是灰色地带，同样，这几种模式的边界并非那么明显，可能你在自己的应用中都会用到。实际上也根本没必要去纠结自己到底用的是MVC、MVP还是MVVP，不管黑猫白猫，捉住老鼠就是好猫。
 
@@ -256,7 +256,7 @@ MVP和MVVM完全隔离了Model和View，但是在有些情况下，数据从Mode
 
 AOP(Aspect-Oriented Programming, 面向切面编程)，诞生于上个世纪90年代，是对OOP(Object-Oriented Programming, 面向对象编程)的补充和完善。OOP引入封装、继承和多态性等概念来建立一种对象层次结构，用以模拟公共行为的一个集合。当我们需要为分散的对象引入公共行为的时候，OOP则显得无能为力。也就是说，OOP允许你定义从上到下的关系，但并不适合定义从左到右的关系。例如日志功能。日志代码往往水平地散布在所有对象层次中，而与它所散布到的对象的核心功能毫无关系。对于其他类型的代码，如安全性、异常处理和透明的持续性也是如此。这种散布在各处的无关的代码被称为横切（Cross-Cutting）代码，在OOP设计中，它导致了大量代码的重复，而不利于各个模块的重用。而AOP技术则恰恰相反，它利用一种称为“横切”的技术，剖解开封装的对象内部，并将那些影响了多个类的公共行为封装到一个可重用模块，并将其名为“Aspect”，即方面。所谓“方面”，简单地说，就是将那些与业务无关，却为业务模块所共同调用的逻辑或责任封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可操作性和可维护性。
 
-![aop2.1.gif](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\e2d0a78a70624f2ab2cebde2482be65b\f73ef201eda2.gif)
+![aop2.1.gif](data\qq432337FEDCB6EB5443353EB50AE37219\e2d0a78a70624f2ab2cebde2482be65b\f73ef201eda2.gif)
 
 5.1 AOP在Android中的使用
 
@@ -270,19 +270,19 @@ AOP把软件系统分为两个部分：核心关注点和横切关注点。业�
 
 先实现，再重构吧。直接考虑代码不臃肿得话，不知道什么时候才能写好了
 
-![joy](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\ad59bd29497c4c5aa47d0e009e23e1fc\joy.png)
+![joy](data\qq432337FEDCB6EB5443353EB50AE37219\ad59bd29497c4c5aa47d0e009e23e1fc\joy.png)
 
 先实现，再重构吧。直接考虑代码不臃肿得话，不知道什么时候才能写好了
 
-![joy](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\ad59bd29497c4c5aa47d0e009e23e1fc\joy.png)
+![joy](data\qq432337FEDCB6EB5443353EB50AE37219\ad59bd29497c4c5aa47d0e009e23e1fc\joy.png)
 
 先实现，再重构吧。直接考虑代码不臃肿得话，不知道什么时候才能写好了
 
-![joy](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\ad59bd29497c4c5aa47d0e009e23e1fc\joy.png)
+![joy](data\qq432337FEDCB6EB5443353EB50AE37219\ad59bd29497c4c5aa47d0e009e23e1fc\joy.png)
 
 （重要的事情说三遍
 
-![sunglasses](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\4a8b6464ff154623a59dca3a9644a6bc\sunglasses.png)
+![sunglasses](data\qq432337FEDCB6EB5443353EB50AE37219\4a8b6464ff154623a59dca3a9644a6bc\sunglasses.png)
 
 ）
 
@@ -290,7 +290,7 @@ AOP把软件系统分为两个部分：核心关注点和横切关注点。业�
 
 代码和文档规范，根据需求进行模块划分，确定交互方式，形成接口文档，这些较为通用的内容不再细说。做Android App时，一般将App进行纵向和横向的划分。纵向的App由UI层，逻辑层和模型层构成，整体结构基于MVP思想(图片来自网络)。
 
-![9fe1e5679a642f9f82373d2a32d461b7_b.jpg](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\c35f2030c82d463ca3e3ca87757bcbb0\9f38088a2af.jpeg)
+![9fe1e5679a642f9f82373d2a32d461b7_b.jpg](data\qq432337FEDCB6EB5443353EB50AE37219\c35f2030c82d463ca3e3ca87757bcbb0\9f38088a2af.jpeg)
 
 UI层内部多用模板方法，以Activity为例一般有BaseActivity，提供包括一些基础样式，Dialog，ActionBar在内的内容，展现的Activity都会继承BaseActivity并实现预留的接口，Activity之间的继承不超过3次；为避免Activity内代码过多，将App的整体控制权后移，也借鉴了IOC做法，大量的逻辑操作放在逻辑层中，逻辑层和UI层通过接口或者Broadcast等实现通信，只传递结果。一般Activity里的代码量都很大，通过这两种方式一般我写的单个Activity内代码量不超过400行。
 
@@ -330,4 +330,4 @@ https://github.com/facebook/fresco
 
 **所以，如果真的是从零开始，别想太多了**
 
-![wink](C:\Users\Administrator\AppData\Local\YNote\data\qq432337FEDCB6EB5443353EB50AE37219\ca74ebb4c3994616bf81387d05a188c5\wink.png)
+![wink](data\qq432337FEDCB6EB5443353EB50AE37219\ca74ebb4c3994616bf81387d05a188c5\wink.png)
