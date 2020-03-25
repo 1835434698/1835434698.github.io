@@ -349,13 +349,13 @@ public void scheduleWorkInBackground() {
             return;
         }
 
-        WorkSpecDao workSpecDao = workDatabase.workSpecDao();//WorkSpec的设置参数执行。
+        WorkSpecDao workSpecDao = workDatabase.workSpecDao();//（调用005-14）
         List<WorkSpec> eligibleWorkSpecs;
 
-        workDatabase.beginTransaction();
+        workDatabase.beginTransaction();//调用005-15
         try {
             eligibleWorkSpecs = workSpecDao.getEligibleWorkForScheduling(
-                    configuration.getMaxSchedulerLimit());
+                    configuration.getMaxSchedulerLimit());//根据参数生成WorkSpec列表（调用005-16）
             if (eligibleWorkSpecs != null && eligibleWorkSpecs.size() > 0) {
                 long now = System.currentTimeMillis();
 
@@ -363,7 +363,7 @@ public void scheduleWorkInBackground() {
                 // Calls to Scheduler#schedule() could potentially result in more schedules
                 // on a separate thread. Therefore, this needs to be done first.
                 for (WorkSpec workSpec : eligibleWorkSpecs) {
-                    workSpecDao.markWorkSpecScheduled(workSpec.id, now);
+                    workSpecDao.markWorkSpecScheduled(workSpec.id, now);//单个处理，包括先后处理顺序，处理线程等工作（调用005-17）
                 }
             }
             workDatabase.setTransactionSuccessful();
@@ -375,10 +375,213 @@ public void scheduleWorkInBackground() {
             WorkSpec[] eligibleWorkSpecsArray = eligibleWorkSpecs.toArray(new WorkSpec[0]);
             // Delegate to the underlying scheduler.
             for (Scheduler scheduler : schedulers) {
-                scheduler.schedule(eligibleWorkSpecsArray);
+                scheduler.schedule(eligibleWorkSpecsArray);//单独线程运行（调用005-18）
             }
         }
     }
 
+//005-14 此方法在androidx.work.impl.WorkDatabase_Impl
+    public WorkSpecDao workSpecDao() {
+        if (this._workSpecDao != null) {
+            return this._workSpecDao;//不为空直接返回
+        } else {
+            synchronized(this) {//加锁
+                if (this._workSpecDao == null) {
+                    this._workSpecDao = new WorkSpecDao_Impl(this);//创建对象（代码比较长就不再贴了）
+                }
+                return this._workSpecDao;
+            }
+        }
+    }
+//005-15
+    public void beginTransaction() {
+        assertNotMainThread();//读参数，是否允许在主线程运行。
+        SupportSQLiteDatabase database = mOpenHelper.getWritableDatabase();//创建数据库
+        mInvalidationTracker.syncTriggers(database);//异步执行数据库配置操作
+        database.beginTransaction();//可以开始操作数据库了
+    }
+
+//005-16
+public List<WorkSpec> getEligibleWorkForScheduling(int schedulerLimit) {
+        String _sql = "SELECT `required_network_type`, `requires_charging`, `requires_device_idle`, `requires_battery_not_low`, `requires_storage_not_low`, `trigger_content_update_delay`, `trigger_max_content_delay`, `content_uri_triggers`, `WorkSpec`.`id` AS `id`, `WorkSpec`.`state` AS `state`, `WorkSpec`.`worker_class_name` AS `worker_class_name`, `WorkSpec`.`input_merger_class_name` AS `input_merger_class_name`, `WorkSpec`.`input` AS `input`, `WorkSpec`.`output` AS `output`, `WorkSpec`.`initial_delay` AS `initial_delay`, `WorkSpec`.`interval_duration` AS `interval_duration`, `WorkSpec`.`flex_duration` AS `flex_duration`, `WorkSpec`.`run_attempt_count` AS `run_attempt_count`, `WorkSpec`.`backoff_policy` AS `backoff_policy`, `WorkSpec`.`backoff_delay_duration` AS `backoff_delay_duration`, `WorkSpec`.`period_start_time` AS `period_start_time`, `WorkSpec`.`minimum_retention_duration` AS `minimum_retention_duration`, `WorkSpec`.`schedule_requested_at` AS `schedule_requested_at`, `WorkSpec`.`run_in_foreground` AS `run_in_foreground` FROM workspec WHERE state=0 AND schedule_requested_at=-1 ORDER BY period_start_time LIMIT (SELECT MAX(?-COUNT(*), 0) FROM workspec WHERE schedule_requested_at<>-1 AND state NOT IN (2, 3, 5))";
+        RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire("SELECT `required_network_type`, `requires_charging`, `requires_device_idle`, `requires_battery_not_low`, `requires_storage_not_low`, `trigger_content_update_delay`, `trigger_max_content_delay`, `content_uri_triggers`, `WorkSpec`.`id` AS `id`, `WorkSpec`.`state` AS `state`, `WorkSpec`.`worker_class_name` AS `worker_class_name`, `WorkSpec`.`input_merger_class_name` AS `input_merger_class_name`, `WorkSpec`.`input` AS `input`, `WorkSpec`.`output` AS `output`, `WorkSpec`.`initial_delay` AS `initial_delay`, `WorkSpec`.`interval_duration` AS `interval_duration`, `WorkSpec`.`flex_duration` AS `flex_duration`, `WorkSpec`.`run_attempt_count` AS `run_attempt_count`, `WorkSpec`.`backoff_policy` AS `backoff_policy`, `WorkSpec`.`backoff_delay_duration` AS `backoff_delay_duration`, `WorkSpec`.`period_start_time` AS `period_start_time`, `WorkSpec`.`minimum_retention_duration` AS `minimum_retention_duration`, `WorkSpec`.`schedule_requested_at` AS `schedule_requested_at`, `WorkSpec`.`run_in_foreground` AS `run_in_foreground` FROM workspec WHERE state=0 AND schedule_requested_at=-1 ORDER BY period_start_time LIMIT (SELECT MAX(?-COUNT(*), 0) FROM workspec WHERE schedule_requested_at<>-1 AND state NOT IN (2, 3, 5))", 1);
+        int _argIndex = 1;
+        _statement.bindLong(_argIndex, (long)schedulerLimit);
+        this.__db.assertNotSuspendingTransaction();
+        Cursor _cursor = DBUtil.query(this.__db, _statement, false, (CancellationSignal)null);
+
+        ArrayList var59;
+        try {
+            int _cursorIndexOfMRequiredNetworkType = CursorUtil.getColumnIndexOrThrow(_cursor, "required_network_type");
+            int _cursorIndexOfMRequiresCharging = CursorUtil.getColumnIndexOrThrow(_cursor, "requires_charging");
+            int _cursorIndexOfMRequiresDeviceIdle = CursorUtil.getColumnIndexOrThrow(_cursor, "requires_device_idle");
+            int _cursorIndexOfMRequiresBatteryNotLow = CursorUtil.getColumnIndexOrThrow(_cursor, "requires_battery_not_low");
+            int _cursorIndexOfMRequiresStorageNotLow = CursorUtil.getColumnIndexOrThrow(_cursor, "requires_storage_not_low");
+            int _cursorIndexOfMTriggerContentUpdateDelay = CursorUtil.getColumnIndexOrThrow(_cursor, "trigger_content_update_delay");
+            int _cursorIndexOfMTriggerMaxContentDelay = CursorUtil.getColumnIndexOrThrow(_cursor, "trigger_max_content_delay");
+            int _cursorIndexOfMContentUriTriggers = CursorUtil.getColumnIndexOrThrow(_cursor, "content_uri_triggers");
+            int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+            int _cursorIndexOfState = CursorUtil.getColumnIndexOrThrow(_cursor, "state");
+            int _cursorIndexOfWorkerClassName = CursorUtil.getColumnIndexOrThrow(_cursor, "worker_class_name");
+            int _cursorIndexOfInputMergerClassName = CursorUtil.getColumnIndexOrThrow(_cursor, "input_merger_class_name");
+            int _cursorIndexOfInput = CursorUtil.getColumnIndexOrThrow(_cursor, "input");
+            int _cursorIndexOfOutput = CursorUtil.getColumnIndexOrThrow(_cursor, "output");
+            int _cursorIndexOfInitialDelay = CursorUtil.getColumnIndexOrThrow(_cursor, "initial_delay");
+            int _cursorIndexOfIntervalDuration = CursorUtil.getColumnIndexOrThrow(_cursor, "interval_duration");
+            int _cursorIndexOfFlexDuration = CursorUtil.getColumnIndexOrThrow(_cursor, "flex_duration");
+            int _cursorIndexOfRunAttemptCount = CursorUtil.getColumnIndexOrThrow(_cursor, "run_attempt_count");
+            int _cursorIndexOfBackoffPolicy = CursorUtil.getColumnIndexOrThrow(_cursor, "backoff_policy");
+            int _cursorIndexOfBackoffDelayDuration = CursorUtil.getColumnIndexOrThrow(_cursor, "backoff_delay_duration");
+            int _cursorIndexOfPeriodStartTime = CursorUtil.getColumnIndexOrThrow(_cursor, "period_start_time");
+            int _cursorIndexOfMinimumRetentionDuration = CursorUtil.getColumnIndexOrThrow(_cursor, "minimum_retention_duration");
+            int _cursorIndexOfScheduleRequestedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "schedule_requested_at");
+            int _cursorIndexOfRunInForeground = CursorUtil.getColumnIndexOrThrow(_cursor, "run_in_foreground");
+            ArrayList _result = new ArrayList(_cursor.getCount());
+
+            while(_cursor.moveToNext()) {
+                String _tmpId = _cursor.getString(_cursorIndexOfId);
+                String _tmpWorkerClassName = _cursor.getString(_cursorIndexOfWorkerClassName);
+                Constraints _tmpConstraints = new Constraints();
+                int _tmp = _cursor.getInt(_cursorIndexOfMRequiredNetworkType);
+                NetworkType _tmpMRequiredNetworkType = WorkTypeConverters.intToNetworkType(_tmp);
+                _tmpConstraints.setRequiredNetworkType(_tmpMRequiredNetworkType);
+                int _tmp_1 = _cursor.getInt(_cursorIndexOfMRequiresCharging);
+                boolean _tmpMRequiresCharging = _tmp_1 != 0;
+                _tmpConstraints.setRequiresCharging(_tmpMRequiresCharging);
+                int _tmp_2 = _cursor.getInt(_cursorIndexOfMRequiresDeviceIdle);
+                boolean _tmpMRequiresDeviceIdle = _tmp_2 != 0;
+                _tmpConstraints.setRequiresDeviceIdle(_tmpMRequiresDeviceIdle);
+                int _tmp_3 = _cursor.getInt(_cursorIndexOfMRequiresBatteryNotLow);
+                boolean _tmpMRequiresBatteryNotLow = _tmp_3 != 0;
+                _tmpConstraints.setRequiresBatteryNotLow(_tmpMRequiresBatteryNotLow);
+                int _tmp_4 = _cursor.getInt(_cursorIndexOfMRequiresStorageNotLow);
+                boolean _tmpMRequiresStorageNotLow = _tmp_4 != 0;
+                _tmpConstraints.setRequiresStorageNotLow(_tmpMRequiresStorageNotLow);
+                long _tmpMTriggerContentUpdateDelay = _cursor.getLong(_cursorIndexOfMTriggerContentUpdateDelay);
+                _tmpConstraints.setTriggerContentUpdateDelay(_tmpMTriggerContentUpdateDelay);
+                long _tmpMTriggerMaxContentDelay = _cursor.getLong(_cursorIndexOfMTriggerMaxContentDelay);
+                _tmpConstraints.setTriggerMaxContentDelay(_tmpMTriggerMaxContentDelay);
+                byte[] _tmp_5 = _cursor.getBlob(_cursorIndexOfMContentUriTriggers);
+                ContentUriTriggers _tmpMContentUriTriggers = WorkTypeConverters.byteArrayToContentUriTriggers(_tmp_5);
+                _tmpConstraints.setContentUriTriggers(_tmpMContentUriTriggers);
+                WorkSpec _item = new WorkSpec(_tmpId, _tmpWorkerClassName);
+                int _tmp_6 = _cursor.getInt(_cursorIndexOfState);
+                _item.state = WorkTypeConverters.intToState(_tmp_6);
+                _item.inputMergerClassName = _cursor.getString(_cursorIndexOfInputMergerClassName);
+                byte[] _tmp_7 = _cursor.getBlob(_cursorIndexOfInput);
+                _item.input = Data.fromByteArray(_tmp_7);
+                byte[] _tmp_8 = _cursor.getBlob(_cursorIndexOfOutput);
+                _item.output = Data.fromByteArray(_tmp_8);
+                _item.initialDelay = _cursor.getLong(_cursorIndexOfInitialDelay);
+                _item.intervalDuration = _cursor.getLong(_cursorIndexOfIntervalDuration);
+                _item.flexDuration = _cursor.getLong(_cursorIndexOfFlexDuration);
+                _item.runAttemptCount = _cursor.getInt(_cursorIndexOfRunAttemptCount);
+                int _tmp_9 = _cursor.getInt(_cursorIndexOfBackoffPolicy);
+                _item.backoffPolicy = WorkTypeConverters.intToBackoffPolicy(_tmp_9);
+                _item.backoffDelayDuration = _cursor.getLong(_cursorIndexOfBackoffDelayDuration);
+                _item.periodStartTime = _cursor.getLong(_cursorIndexOfPeriodStartTime);
+                _item.minimumRetentionDuration = _cursor.getLong(_cursorIndexOfMinimumRetentionDuration);
+                _item.scheduleRequestedAt = _cursor.getLong(_cursorIndexOfScheduleRequestedAt);
+                int _tmp_10 = _cursor.getInt(_cursorIndexOfRunInForeground);
+                _item.runInForeground = _tmp_10 != 0;
+                _item.constraints = _tmpConstraints;
+                _result.add(_item);
+            }
+
+            var59 = _result;
+        } finally {
+            _cursor.close();
+            _statement.release();
+        }
+
+        return var59;
+    }
+
+//005-17
+public int markWorkSpecScheduled(String id, long startTime) {
+        this.__db.assertNotSuspendingTransaction();
+        SupportSQLiteStatement _stmt = this.__preparedStmtOfMarkWorkSpecScheduled.acquire();
+        int _argIndex = 1;
+        _stmt.bindLong(_argIndex, startTime);
+        _argIndex = 2;
+        if (id == null) {
+            _stmt.bindNull(_argIndex);
+        } else {
+            _stmt.bindString(_argIndex, id);
+        }
+
+        this.__db.beginTransaction();
+
+        int var7;
+        try {
+            int _result = _stmt.executeUpdateDelete();
+            this.__db.setTransactionSuccessful();
+            var7 = _result;
+        } finally {
+            this.__db.endTransaction();
+            this.__preparedStmtOfMarkWorkSpecScheduled.release(_stmt);
+        }
+
+        return var7;
+    }
+
+//005-18
+    public void schedule(@NonNull WorkSpec... workSpecs) {
+        if (mIsMainProcess == null) {
+            // The default process name is the package name.
+            mIsMainProcess = TextUtils.equals(mContext.getPackageName(), getProcessName());
+        }
+
+        if (!mIsMainProcess) {
+            Logger.get().info(TAG, "Ignoring schedule request in non-main process");
+            return;
+        }
+
+        registerExecutionListenerIfNeeded();
+
+        // Keep track of the list of new WorkSpecs whose constraints need to be tracked.
+        // Add them to the known list of constrained WorkSpecs and call replace() on
+        // WorkConstraintsTracker. That way we only need to synchronize on the part where we
+        // are updating mConstrainedWorkSpecs.
+        List<WorkSpec> constrainedWorkSpecs = new ArrayList<>();
+        List<String> constrainedWorkSpecIds = new ArrayList<>();
+        for (WorkSpec workSpec : workSpecs) {
+            if (workSpec.state == WorkInfo.State.ENQUEUED
+                    && !workSpec.isPeriodic()
+                    && workSpec.initialDelay == 0L
+                    && !workSpec.isBackedOff()) {
+                if (workSpec.hasConstraints()) {
+                    if (SDK_INT >= 23 && workSpec.constraints.requiresDeviceIdle()) {
+                        // Ignore requests that have an idle mode constraint.
+                        Logger.get().debug(TAG,
+                                String.format("Ignoring WorkSpec %s, Requires device idle.",
+                                        workSpec));
+                    } else if (SDK_INT >= 24 && workSpec.constraints.hasContentUriTriggers()) {
+                        // Ignore requests that have content uri triggers.
+                        Logger.get().debug(TAG,
+                                String.format("Ignoring WorkSpec %s, Requires ContentUri triggers.",
+                                        workSpec));
+                    } else {
+                        constrainedWorkSpecs.add(workSpec);
+                        constrainedWorkSpecIds.add(workSpec.id);
+                    }
+                } else {
+                    Logger.get().debug(TAG, String.format("Starting work for %s", workSpec.id));
+                    mWorkManagerImpl.startWork(workSpec.id);
+                }
+            }
+        }
+
+        // onExecuted() which is called on the main thread also modifies the list of mConstrained
+        // WorkSpecs. Therefore we need to lock here.
+        synchronized (mLock) {
+            if (!constrainedWorkSpecs.isEmpty()) {
+                Logger.get().debug(TAG, String.format("Starting tracking for [%s]",
+                        TextUtils.join(",", constrainedWorkSpecIds)));
+                mConstrainedWorkSpecs.addAll(constrainedWorkSpecs);
+                mWorkConstraintsTracker.replace(mConstrainedWorkSpecs);
+            }
+        }
+    }
 ```
 
