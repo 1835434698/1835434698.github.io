@@ -142,7 +142,7 @@ public static void loop() {
 
         for (;;) {//无限循环
             //只要不阻塞就一直取下去。取出一个消息
-            Message msg = queue.next(); // might block
+            Message msg = queue.next(); // might block（调用005）
             if (msg == null) {//为空则退出程序。
                 // No message indicates that the message queue is quitting.
                 return;
@@ -266,7 +266,113 @@ Handler handler = new Handler(){
         }
 
     };
+//005
+@UnsupportedAppUsage
+    Message next() {
+        // Return here if the message loop has already quit and been disposed.
+        // This can happen if the application tries to restart a looper after quit
+        // which is not supported.
+        final long ptr = mPtr;
+        if (ptr == 0) {
+            return null;
+        }
 
+        int pendingIdleHandlerCount = -1; // -1 only during first iteration
+        int nextPollTimeoutMillis = 0;
+        for (;;) {
+            if (nextPollTimeoutMillis != 0) {
+                Binder.flushPendingCommands();//flus缓存到bunder
+            }
+
+            nativePollOnce(ptr, nextPollTimeoutMillis);//等待（可能是等到优先级高的消息优先处理或者等待被唤醒）
+
+            synchronized (this) {
+                // Try to retrieve the next message.  Return if found.
+                final long now = SystemClock.uptimeMillis();
+                Message prevMsg = null;
+                Message msg = mMessages;
+                if (msg != null && msg.target == null) {
+                    // Stalled by a barrier.  Find the next asynchronous message in the queue.
+                    do {
+                        prevMsg = msg;
+                        msg = msg.next;
+                    } while (msg != null && !msg.isAsynchronous());
+                }
+                if (msg != null) {
+                    if (now < msg.when) {
+                        // Next message is not ready.  Set a timeout to wake up when it is ready.
+                        nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
+                    } else {
+                        // Got a message.
+                        mBlocked = false;
+                        if (prevMsg != null) {
+                            prevMsg.next = msg.next;
+                        } else {
+                            mMessages = msg.next;
+                        }
+                        msg.next = null;
+                        if (DEBUG) Log.v(TAG, "Returning message: " + msg);
+                        msg.markInUse();
+                        return msg;
+                    }
+                } else {
+                    // No more messages.
+                    nextPollTimeoutMillis = -1;
+                }
+
+                // Process the quit message now that all pending messages have been handled.
+                if (mQuitting) {
+                    dispose();
+                    return null;
+                }
+
+                // If first time idle, then get the number of idlers to run.
+                // Idle handles only run if the queue is empty or if the first message
+                // in the queue (possibly a barrier) is due to be handled in the future.
+                if (pendingIdleHandlerCount < 0
+                        && (mMessages == null || now < mMessages.when)) {
+                    pendingIdleHandlerCount = mIdleHandlers.size();
+                }
+                if (pendingIdleHandlerCount <= 0) {
+                    // No idle handlers to run.  Loop and wait some more.
+                    mBlocked = true;
+                    continue;
+                }
+
+                if (mPendingIdleHandlers == null) {
+                    mPendingIdleHandlers = new IdleHandler[Math.max(pendingIdleHandlerCount, 4)];
+                }
+                mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);
+            }
+
+            // Run the idle handlers.
+            // We only ever reach this code block during the first iteration.
+            for (int i = 0; i < pendingIdleHandlerCount; i++) {
+                final IdleHandler idler = mPendingIdleHandlers[i];
+                mPendingIdleHandlers[i] = null; // release the reference to the handler
+
+                boolean keep = false;
+                try {
+                    keep = idler.queueIdle();
+                } catch (Throwable t) {
+                    Log.wtf(TAG, "IdleHandler threw exception", t);
+                }
+
+                if (!keep) {
+                    synchronized (this) {
+                        mIdleHandlers.remove(idler);
+                    }
+                }
+            }
+
+            // Reset the idle handler count to 0 so we do not run them again.
+            pendingIdleHandlerCount = 0;
+
+            // While calling an idle handler, a new message could have been delivered
+            // so go back and look again for a pending message without waiting.
+            nextPollTimeoutMillis = 0;
+        }
+    }
 ```
 
 
