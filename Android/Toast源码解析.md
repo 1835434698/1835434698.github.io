@@ -2,6 +2,7 @@ Toast源码解析
 
 ```java
 Toast.makeText(mApp, "", Toast.LENGTH_SHORT).show();
+//最终由NotificationManagerService负责show。
 
 1、首先创建一个Toast
     需要传递一个上下文，但是这个上下文只是用来获取包名、SystemService等。
