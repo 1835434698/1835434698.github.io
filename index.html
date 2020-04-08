@@ -3,16 +3,32 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>目录</title>
+		<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+		<script  type="text/javascript">   
+  function   searchFiles(){   
+  	
+          var   fso   =   new   ActiveXObject("Scripting.FileSystemObject");   
+          var   f   =   fso.GetFolder(document.all.fixfolder.value);   
+          var   fc   =   new   Enumerator(f.files);   
+          var   s   =   "";   
+          for   (;   !fc.atEnd();   fc.moveNext())   
+                  {   
+                          s   +=   fc.item();   
+                          s   +=   "<br>";   
+                  }   
+                  fk   =   new   Enumerator(f.SubFolders);   
+                  for   (;   !fk.atEnd();   fk.moveNext())   
+                  {   
+                  s   +=   fk.item();   
+                  s   +=   "<br>";   
+                  }   
+    
+                  textarea.innerHTML   =   s   
+  }   
+  </script>   
 	</head>
 	<body>
-		<h3>目录</h2>
-			<div>
-				<a href="decompile.html">1、反编译apk重新打包签名</a>
-				
-			</div>
-			<div>
-				<a href="gradle.html">2、gradle打包流程</a>
-				
-			</div>
+		<h3> <a href="Android/">目录</a></h3>
+		<h4>Android文件夹下</h4>
 	</body>
 </html>
