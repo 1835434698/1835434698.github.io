@@ -4,6 +4,10 @@
 
 注意版本号要与'androidx.appcompat:appcompat:1.1.0'对应，要不然会有版本冲突。这个google做的不太好，官方文档也没有说明。
 
+workmanager 不会随着app被杀死就不执行。
+
+
+
 2、实现Worker类。
 
 复写doWork方法。在其内部可以写自己要运行的代码，代码会运行子线程中。
