@@ -860,6 +860,3 @@ Collector collectorObj = JSONUtils.parseJsonToObj(collector, Collector.class);Fl
 
 这个方法的第二个参数的返回值可能是null，所以，直接调用addAll（），就会抛空指针异常。所以，就如上，那么一提取。就好多啦。
 
-
-
-转载：https://www.cnblogs.com/jpfss/p/9928747.html
