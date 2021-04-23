@@ -215,10 +215,3 @@ Jarsigner阶段。通过Jarsigner工具，对上面的apk进行debug或release�
 
 ![image-20191218161901092](data\typora-user-images\image-20191218161901092.png)
 
-
-
-参考：https://www.jianshu.com/p/286d2b372334
-
-参考：https://blog.csdn.net/loongago/article/details/89646920
-
-参考：https://blog.csdn.net/lostinai/article/details/54694564
