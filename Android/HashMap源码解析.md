@@ -141,23 +141,23 @@ static final int hash(Object key) {
 //04
 final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
-        Node<K,V>[] tab; Node<K,V> p; int n, i;
+        Node<K,V>[] tab; Node<K,V> p; int n, i;//tab就算hashmap的数组。 p为数组的一个节点也是一个链表的端点。
         if ((tab = table) == null || (n = tab.length) == 0)
-            n = (tab = resize()).length;
-        if ((p = tab[i = (n - 1) & hash]) == null)//除法散列法进行散列(数组层次为空一定不会碰撞)
-            tab[i] = newNode(hash, key, value, null);//设置节点对象
+            n = (tab = resize()).length;//数组为空，重新计算。
+        if ((p = tab[i = (n - 1) & hash]) == null)//除法散列法进行散列(数组层次为空一定不会碰撞)。取出应该存入的链表的端点。如果链表为空，进入if内
+            tab[i] = newNode(hash, key, value, null);//创建node对象，并且放入链表端点。
         else {
             Node<K,V> e; K k;
-            if (p.hash == hash &&//hashcode相等，然后使用下一个判断
+            if (p.hash == hash &&//与端点的hash对比，hashcode相等，然后使用下一个判断
                 ((k = p.key) == key || (key != null && key.equals(k))))//判断是否是同一个对象
                 e = p;
             else if (p instanceof TreeNode)//如果是红黑树结点的话，进行红黑树插入
                 e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);//跳转 05
-            else {//不清楚为什么需要这个判断
+            else {//不是红黑树，是长度小于8的链表
                 for (int binCount = 0; ; ++binCount) {//遍历判断在链表中哪一个有碰撞
-                    if ((e = p.next) == null) {//是否需要创建新节点
-                        p.next = newNode(hash, key, value, null);
-                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                    if ((e = p.next) == null) {//遍历链表，如果是到了链表尾部，则创建新节点
+                        p.next = newNode(hash, key, value, null);//则创建新节点
+                        if (binCount >= TREEIFY_THRESHOLD - 1) // 判断长度是否大于等于8，
                             treeifyBin(tab, hash);//转换为树 跳转 06
                         break;
                     }
@@ -190,14 +190,14 @@ final TreeNode<K,V> putTreeVal(HashMap<K,V> map, Node<K,V>[] tab,
                                int h, K k, V v) {
     Class<?> kc = null;
     boolean searched = false;
-    TreeNode<K,V> root = (parent != null) ? root() : this;
-    for (TreeNode<K,V> p = root;;) {
+    TreeNode<K,V> root = (parent != null) ? root() : this;// 判断是否有根节点，没有则设置自己。
+    for (TreeNode<K,V> p = root;;) {// 遍历树
         int dir, ph; K pk;
-        if ((ph = p.hash) > h)
+        if ((ph = p.hash) > h)// 判断hash值大小，决定放在左子树还是右子树
             dir = -1;
         else if (ph < h)
             dir = 1;
-        else if ((pk = p.key) == k || (k != null && k.equals(pk)))
+        else if ((pk = p.key) == k || (k != null && k.equals(pk)))//是同一个
             return p;
         else if ((kc == null &&
                   (kc = comparableClassFor(k)) == null) ||
@@ -211,7 +211,7 @@ final TreeNode<K,V> putTreeVal(HashMap<K,V> map, Node<K,V>[] tab,
                      (q = ch.find(h, k, kc)) != null))
                     return q;
             }
-            dir = tieBreakOrder(k, pk);
+            dir = tieBreakOrder(k, pk);//用类名转ascii作对比
         }
 
         TreeNode<K,V> xp = p;
@@ -226,7 +226,7 @@ final TreeNode<K,V> putTreeVal(HashMap<K,V> map, Node<K,V>[] tab,
             x.parent = x.prev = xp;
             if (xpn != null)
                 ((TreeNode<K,V>)xpn).prev = x;
-            moveRootToFront(tab, balanceInsertion(root, x));
+            moveRootToFront(tab, balanceInsertion(root, x));//重新平衡树
             return null;
         }
     }
@@ -244,7 +244,7 @@ final void treeifyBin(Node<K,V>[] tab, int hash) {
     else if ((e = tab[index = (n - 1) & hash]) != null) {
         TreeNode<K,V> hd = null, tl = null;
         do {
-            TreeNode<K,V> p = replacementTreeNode(e, null);
+            TreeNode<K,V> p = replacementTreeNode(e, null);//转换为树节点。
             if (tl == null)
                 hd = p;
             else {
@@ -254,17 +254,55 @@ final void treeifyBin(Node<K,V>[] tab, int hash) {
             tl = p;
         } while ((e = e.next) != null);
         if ((tab[index] = hd) != null)
-            hd.treeify(tab);
+            hd.treeify(tab);//转为真正的平衡树二叉树。跳转07
     }
 }
 ```
 
+```java
+//07
+   final void treeify(Node<K,V>[] tab) {
+            TreeNode<K,V> root = null;
+            for (TreeNode<K,V> x = this, next; x != null; x = next) {
+                next = (TreeNode<K,V>)x.next;
+                x.left = x.right = null;//树的左右孩子置空
+                if (root == null) {//根
+                    x.parent = null;
+                    x.red = false;//黑色
+                    root = x;
+                }
+                else {
+                    K k = x.key;
+                    int h = x.hash;
+                    Class<?> kc = null;
+                    for (TreeNode<K,V> p = root;;) {//遍历树
+                        int dir, ph;
+                        K pk = p.key;
+                        if ((ph = p.hash) > h)//对比hash值，决定左子树还是右子树
+                            dir = -1;
+                        else if (ph < h)
+                            dir = 1;
+                        else if ((kc == null &&
+                                  (kc = comparableClassFor(k)) == null) ||
+                                 (dir = compareComparables(kc, k, pk)) == 0)
+                            dir = tieBreakOrder(k, pk);//ascii对比、identityHashCode对比
 
-
-
-
-
-
+                        TreeNode<K,V> xp = p;
+                        if ((p = (dir <= 0) ? p.left : p.right) == null) {
+                            x.parent = xp;
+                            if (dir <= 0)
+                                xp.left = x;
+                            else
+                                xp.right = x;
+                            root = balanceInsertion(root, x);//平衡树
+                            break;
+                        }
+                    }
+                }
+            }
+            moveRootToFront(tab, root);
+        }
+```
 
 
 
