@@ -42,7 +42,7 @@ public synchronized static void init(Context context, ThreadPoolExecutor tpe) th
             long startInit = System.currentTimeMillis();
             //billy.qi modified at 2017-12-06
             //load by plugin first
-            loadRouterMap();//加载map，实际就是将registerByPlugin = false
+            loadRouterMap();//加载map，实际就是将registerByPlugin = false 这里是将app中所有的group都读取到map中
             if (registerByPlugin) {
                 logger.info(TAG, "Load router map by arouter-auto-register plugin.");
             } else {
